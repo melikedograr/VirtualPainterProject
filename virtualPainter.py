@@ -13,6 +13,7 @@ class Painter:
         self.img = img
         self.xp, self.yp = prev
         self.canvas = canvas
+        self.eraser = False
 
     def addHeader(self):
         cv2.rectangle(self.img, (0, 0), (100, 100), (200, 100, 100), cv2.FILLED)
@@ -55,13 +56,23 @@ cap.set(3, 480)
 cap.set(4, 640)
 canvas = np.zeros((480, 640, 3), np.uint8)
 color = (0, 0, 0)
-prev = (0,0)
+prev = (0, 0)
+
 while True:
     success, img = cap.read()
     img = cv2.flip(img, 1)
     painter = Painter(img=img, color=color, prev=prev, canvas=canvas)
     img, prev, canvas = painter.show()
     color = painter.colorRGB
-    cv2.imshow("Image", img)
+
+    final = img
+    imgGray = cv2.cvtColor(canvas, cv2.COLOR_BGR2GRAY)
+    _, imgInv = cv2.threshold(imgGray, 50, 255, cv2.THRESH_BINARY_INV)
+    imgInv = cv2.cvtColor(imgInv, cv2.COLOR_GRAY2BGR)
+
+    final = cv2.bitwise_and(img, imgInv)
+    final = cv2.bitwise_or(final, canvas)
+
+    cv2.imshow("Image", final)
     cv2.imshow("Canvas", canvas)
     cv2.waitKey(1)
