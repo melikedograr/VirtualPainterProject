@@ -8,11 +8,11 @@ cap.set(4, 640)
 canvas = np.zeros((480, 640, 3), np.uint8)
 color = (0, 0, 0)
 xp, yp = (0, 0)
+saved = False
 
 while True:
     success, img = cap.read()
     img = cv2.flip(img, 1)
-
 
     detector = htm.handDetector()
     img = detector.findHands(img)
@@ -23,6 +23,8 @@ while True:
     cv2.rectangle(img, (100, 0), (200, 100), (100, 200, 100), cv2.FILLED)
     cv2.rectangle(img, (200, 0), (300, 100), (100, 100, 200), cv2.FILLED)
     cv2.rectangle(img, (300, 0), (400, 100), (0, 0, 0), cv2.FILLED)
+    cv2.rectangle(img, (400, 0), (600, 100), (255, 255, 255), cv2.FILLED)
+    cv2.putText(img, 'Save', (420, 70), cv2.FONT_HERSHEY_PLAIN, 4, (0, 0, 0))
     ##########
 
     if len(lmList) != 0:
@@ -50,8 +52,11 @@ while True:
                     color = (100, 100, 200)
                 elif 300 < index_finger_x < 400:
                     color = (0, 0, 0)
+                elif 400 < index_finger_x < 600:
+                    if not saved:
+                        cv2.imwrite('image.jpg', canvas)
+                        print('save image')
         #######
-
 
         #### draw
         if not selection_mode:
