@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 import HandTrackingModule as htm
+import tensorflow as tf
 
 cap = cv2.VideoCapture(0)
 cap.set(3, 480)
@@ -9,6 +10,9 @@ canvas = np.zeros((480, 640, 3), np.uint8)
 color = (0, 0, 0)
 xp, yp = (0, 0)
 saved = False
+
+model = tf.keras.models.load_model('./ShapeDetectionDeepLearning/shape_detection_model')
+
 
 while True:
     success, img = cap.read()
@@ -55,7 +59,19 @@ while True:
                 elif 400 < index_finger_x < 600:
                     if not saved:
                         cv2.imwrite('image.jpg', canvas)
-                        print('save image')
+                        gray = cv2.cvtColor(canvas, cv2.COLOR_RGB2GRAY)
+                        gray = cv2.resize(gray, (200,200))
+
+                        images = [gray]
+                        images = np.array(images)
+                        prediction = model.predict(images)
+
+                        print(prediction)
+                        pred = list(prediction[0])
+                        max_index = pred.index(max(pred))
+                        dic = { 0:'circle', 1:'square', 2:'star',3:'triangle'}
+                        cv2.putText(img, dic[max_index], (200, 300), cv2.FONT_HERSHEY_PLAIN, 10, (0,0,0))
+
         #######
 
         #### draw
